@@ -4,4 +4,4 @@ The R scripts in this repository contain the code necessary to reproduce all sim
 
 * [Simulation Studies](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/Simulation%20Studies): contains the code necessary to replicate the simulations in the paper
 
-* LHS: contains the code necessary to replicate the LHS analysis
+* [LHS](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/LHS): contains the code necessary to replicate the LHS analysis
