@@ -48,17 +48,7 @@ datGenBiv <- function(N, ni, prob, c.parm,
   X <- X[order(X$id, X$time),]
   # remove ID from X
   X$id <- NULL
-  
-  ### MODEL MISPECIFICATION PART ###
-  # generate an extra confounder c that is unrelated with grp but related with grp.
-  #X$conf.extra <- rep(rnorm(N), each = m)
-  # generate an extra confounder c that is related with group
-  # X$conf.extra <- rep(rnorm(N, mean = X$grp), each = m)
-  # generate a confounder that is the squared of the one we have already
-  # X$conf.extra <- (X$conf)^2
-  # genetate interaction between grp and confounder
-  #X$conf.extra <- X$grp*X$conf
-  
+
   ###################################################################################################
   # generate joint distribution of the RE
   # first list all element of G
@@ -83,10 +73,6 @@ datGenBiv <- function(N, ni, prob, c.parm,
   R   <-  matrix(c(sigma2.e1, rho.e*sqrt(sigma2.e1*sigma2.e2), 
                    rho.e*sqrt(sigma2.e1*sigma2.e2), sigma2.e2), nrow = 2, byrow = TRUE)
   err <-  mvrnorm(n = N*m,  mu = rep(0, 2), Sigma = R)
-  # error t distribution
-  #err <-  rmvt(n = N*m, df = 2, sigma = R)
-  # error has a log-normal distribution
-  #err <- rlnorm.rplus(n = N*m, rep(0, 2), R)
   # generate the two outcomes
   Y1 <- cbind(1, as.matrix(X))%*%beta_y1 + a1 + b1*X[, "time"] + err[, 1]
   Y2 <- cbind(1, as.matrix(X))%*%beta_y2 + a2 + b2*X[, "time"] + err[, 2]
@@ -312,101 +298,6 @@ SampledFunY1 <- function(d, NsPerStratumUniv, Y1.cutoffsODS, Y1.cutoffsBDS){
   out <- list(dat = d, SampProbsODS = SampProbsODS, SampProbsBDS = SampProbsBDS)
   return(out)
 }
-
-
-# SampledFunReuse <- function(d, Nsample, NsPerStratumUniv, Y1.sample = TRUE,
-#                        Y2.sample = TRUE, Y1.cutoffsODS, Y1.cutoffsBLUP,
-#                        Y2.cutoffsBLUP){
-# 
-# 
-#   #### slope sampling ####
-#   d$SampledSlpODS  <- 0
-#   d$SampledSlpBLUP <- 0
-#   SampProbs        <- list()
-#   Sampled          <- data.frame(id = d$id, strataY1 = 0, strataY2 = 0, var.sampled = 0)
-#   # calculate subject specific intercept and slope for the first outcome
-#   if(Y1.sample == TRUE){
-#     #### ODS SAMPLING ####
-#     IntSlps <- CalcSSIntSlp(Y = d$Y1, time = d$time, id = d$id)
-#     Slp <- IntSlps[[2]]
-#     # identify stratum membership
-#     StratSlp <- identify.stratum(w.function="slope", cutpoints = Y1.cutoffsODS$SlpCutUniv, Slp = Slp)
-#     # identify those sampled along with individual sampling probs and stratum sampling probs
-#     SampledSlp <- ods.sampling(id.long = d$id, stratum.long = StratSlp, SamplingStrategy = "IndepODS",
-#                                NsPerStratum = NsPerStratumUniv)
-#     d$SampledSlpODS         <- SampledSlp[[1]]
-#     SampProbs[[1]]          <- SampledSlp$SampProbs
-# 
-#     Sampled$var.sampled     <- ifelse(d$id %in% d$id[d$SampledSlpODS == 1], "Y1",  Sampled$var.sampled)
-#     Sampled$strataY1        <- StratSlp
-# 
-#     #### BLUP SAMPLING ####
-#     mod <- lme(Y1 ~ time*conf, random = ~ 1 + time | id, data = d,
-#                control = lmeControl(maxIter = 1e9, opt = c("optim")))
-#     random.slope <- ranef(mod)[,2]
-#     StratSlpBLUP <- identify.stratum(w.function="slope", cutpoints = Y1.cutoffsBLUP$SlpCutUniv, Slp = random.slope)
-#     # each number of StratSlpBLUP represent wheter a subject was in stratum 1, 2, and 3
-#     # replicate the number per number of time a subject is observed
-#     # compute number of observations per subject
-#     nobs         <- d %>% group_by(id) %>% summarise(nobs = n()) %>% pull(nobs)
-#     StratSlpBLUP <- rep(StratSlpBLUP, times = nobs)
-#     SampledSlp   <- ods.sampling(id.long = d$id, stratum.long = StratSlpBLUP, SamplingStrategy = "IndepODS",
-#                                  NsPerStratum = NsPerStratumUniv)
-#     d$SampledSlpBLUP <- SampledSlp$Sampled
-#   }
-# 
-#   # repeat the same for Y2
-#   if(Y2.sample == TRUE){
-# 
-#     #### ODS SAMPLING ####
-#     # take those who were not sampled based on Y1
-#     d.new <- d %>% filter(SampledSlpODS == 0)
-#     IntSlps <- CalcSSIntSlp(Y = d.new$Y2, time = d.new$time, id = d.new$id)
-#     Slp <- IntSlps[[2]]
-#     # identify stratum membership
-#     StratSlp <- identify.stratum(w.function="slope", cutpoints = Y2.cutoffsODS$SlpCutUniv, Slp = Slp)
-#     # identify those sampled along with individual sampling probs and stratum sampling probs
-#     SampledSlp <- ods.sampling(id.long = d.new$id, stratum.long = StratSlp, SamplingStrategy = "IndepODS",
-#                                NsPerStratum = NsPerStratumUniv)
-#     d.new$SampledSlpODS     <- SampledSlp[[1]]
-#     SampProbs[[2]]          <- SampledSlp$SampProbs
-#     Sampled$var.sampled     <- ifelse(d$id %in% d.new$id[d.new$SampledSlpODS == 1], "Y2",  Sampled$var.sampled)
-#     Sampled$strataY2        <- ifelse(d$id %in% d.new$id, StratSlp,  NA)
-# 
-#     #### BLUP SAMPLING ####
-#     # take those who were not sampled based on Y1
-#     d.new.blup <- d %>% filter(SampledSlpBLUP == 0)
-#     mod <- lme(Y2 ~ time*conf, random = ~ 1 + time | id, data = d.new.blup,
-#                control = lmeControl(maxIter = 1e9, opt = c("optim")))
-#     random.slope <- ranef(mod)[,2]
-#     StratSlpBLUP <- identify.stratum(w.function="slope", cutpoints = Y2.cutoffsBLUP$SlpCutUniv, Slp = random.slope)
-#     # each number of StratSlpBLUP represent wheter a subject was in stratum 1, 2, and 3
-#     # replicate the number per number of time a subject is observed
-#     # compute number of observations per subject
-#     nobs         <- d.new.blup %>% group_by(id) %>% summarise(nobs = n()) %>% pull(nobs)
-#     StratSlpBLUP <- rep(StratSlpBLUP, times = nobs)
-#     SampledSlp <- ods.sampling(id.long = d.new.blup$id, stratum.long = StratSlpBLUP, SamplingStrategy = "IndepODS",
-#                                NsPerStratum = NsPerStratumUniv)
-#     d.new.blup$SampledSlpBLUP <- SampledSlp[[1]]
-#     # put the data back together
-#     d.ods  <- d %>% filter(SampledSlpODS == 1) %>% bind_rows(d.new) %>% arrange(id, time) %>%
-#       dplyr::select(- SampledSlpBLUP) %>% ungroup()
-#     d.blup <- d %>% filter(SampledSlpBLUP == 1) %>% bind_rows(d.new.blup) %>% arrange(id, time) %>%
-#       dplyr::select(SampledSlpBLUP)
-#     # need to mere d.ods and d.blup by ID.
-#     d     <- bind_cols(d.ods, d.blup)
-#   }
-# 
-#   #### simple random sampling ####
-#   SampledRan   <- random.sampling(id.long = d$id, n = Nsample)
-#   d$SampledRan <- SampledRan
-# 
-#   # output
-#   out <- list(dat = d, SampProbs = SampProbs,  var.sampled = Sampled)
-#   return(out)
-# }
-
-
 
 ## Function for outcome dependent sampling when we sample each outcome independently
 ## INPUT:  d (dataset), Nsample (number of subjects we want to sample), NsPerStratum (vector indicating how many subject
