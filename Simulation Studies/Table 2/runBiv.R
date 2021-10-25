@@ -14,7 +14,7 @@ library(numDeriv)
 # load R files with function
 source("ACML.R")
 source("DatGenFunBiv.R")
-source("FitImputeFunsIIA.R")
+source("FitImputeMI.R")
 source("setupBiv.R")
 
 fisherZ <- function(x) log((1+x)/(1-x))
