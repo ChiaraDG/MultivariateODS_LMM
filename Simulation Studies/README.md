@@ -1,4 +1,4 @@
-### Simulation Studies
+## Simulation Studies
 
 The folder contains .R files to replicate the results from the simulation studies reported in the paper:
 
