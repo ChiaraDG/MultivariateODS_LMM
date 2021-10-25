@@ -150,10 +150,6 @@ DirectImputationOffsetBiv <- function(formula.fixed, formula.random, formula.imp
   sigmas  <- vcov(mod.imp)
   b.new   <- as.vector(rmvnorm(1, as.vector(betas), as.matrix(sigmas)))
   
-  # get a se of new covariance matrix: use an inverse Wishart that is super flat
-  #se.cov   <- lmeInfo::varcomp_vcov(mod.imp)
-  #se.new   <- LaplacesDemon::rinvwishart(n = length(betas), S = se.cov)
-  
   # output
   out <- list(new.VarCov = VarCov.Mat.Random, new.se = SE, est.new = b.new,
               data = long.dat, b.sim = betas)
@@ -162,7 +158,7 @@ DirectImputationOffsetBiv <- function(formula.fixed, formula.random, formula.imp
 
 
 
-## Code to run the IIM
+## Code to run the MI
 ## INPUT:   formula.fixed (formula for the fixed effects in our model of interest), formula.random
 ##          (formula for the random effects in our model of interest). formula.imp 
 ##          (formula for the logistic model used for imputation), data (dataset), n.imp (number of imputations),
@@ -174,7 +170,7 @@ DirectImputationOffsetBiv <- function(formula.fixed, formula.random, formula.imp
 ## Notes:   data needs to be in the format used for acml. Each row is a single observation 
 ##          (i.e.if subject i has 3 Y_1 and 3 Y_2, we will have 6 rows)
 
-IIM.Imputation <- function(formula.fixed, formula.random, formula.imp, data, iter, id,
+MI.Imputation <- function(formula.fixed, formula.random, formula.imp, data, iter, id,
                 grp, timegrp, time, yname){
   
   names(data)[names(data) == id]     <- "id"
@@ -199,8 +195,6 @@ IIM.Imputation <- function(formula.fixed, formula.random, formula.imp, data, ite
   # start imputing
   i <- 1
   
-  #VCmat <- SEmat <- bs <- list()
-  
   while(i <= iter){
     print(i)
     imputation <- DirectImputationOffsetBiv(formula.fixed, formula.random, formula.imp, 
@@ -213,9 +207,6 @@ IIM.Imputation <- function(formula.fixed, formula.random, formula.imp, data, ite
     b.new      <- imputation$est.new
     VarCov.Mat <- imputation$new.VarCov
     SE         <- imputation$new.se
-    #bs[[i]]    <- imputation$b.sim
-    #VCmat[[i]] <- imputation$new.VarCov
-    #SEmat[[i]] <- imputation$new.se
     i <- i + 1
   }
   
@@ -246,7 +237,7 @@ IIM.Imputation <- function(formula.fixed, formula.random, formula.imp, data, ite
 }
 
 
-IIM <- function(formula.fixed, formula.random, formula.imp, data, n.imp, id,
+MI <- function(formula.fixed, formula.random, formula.imp, data, n.imp, id,
                            grp, timegrp, time, yname, iter){
   
   Ests.Imp  <- Covs.Imp <- list()
@@ -255,7 +246,7 @@ IIM <- function(formula.fixed, formula.random, formula.imp, data, n.imp, id,
   
   for(i in 1:n.imp){
     print(i)
-    mod  <- IIM.Imputation(formula.fixed, formula.random, formula.imp, data, iter, id,
+    mod  <- MI.Imputation(formula.fixed, formula.random, formula.imp, data, iter, id,
                            grp, timegrp, time, yname)
     # save results
     Ests.Imp[[i]]   <- mod$coefficients
