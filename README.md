@@ -4,6 +4,6 @@ The R scripts in this repository contain the code necessary to reproduce simulat
 
 * [Simulation Studies](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/Simulation%20Studies): contains the code necessary to replicate the simulations in the paper
 
-* [LHS](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/LHS): contains the code necessary to replicate the LHS analysis
+* [LHS](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/LHS): contains the code necessary to replicate the analysis of the Lung Health Study
 
 More detailed instruction on how to reproduce the results are provided in each folder
