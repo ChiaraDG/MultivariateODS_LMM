@@ -318,19 +318,19 @@ simulation <- function(run, count)
   dat.bds$gt1     <- ifelse(dat.bds$SampledSlpBLUP == 1, dat.bds$gt1, NA)
   dat.bds$gt2     <- ifelse(dat.bds$SampledSlpBLUP == 1, dat.bds$gt2, NA)
    
-  model.rs   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+  model.rs   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
                     formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
                     formula.imp = grp ~ conf, data = dat.rs, 
                     n.imp = nrep.imp, n.burn = burn, id = "id", grp = c("g1", "g2"), 
                     timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
   
-  model.ods   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+  model.ods   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
                      formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
                      formula.imp = grp ~ conf, data = dat.ods, 
                      n.imp = nrep.imp, n.burn = burn, id = "id", grp = c("g1", "g2"), 
                      timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
    
-  model.bds   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+  model.bds   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
                       formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
                       formula.imp = grp ~ conf, data = dat.bds, 
                       n.imp = nrep.imp, n.burn = burn, id = "id", grp = c("g1", "g2"), 
