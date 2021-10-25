@@ -6,7 +6,7 @@ The folder contains .R files to replicate the results from the simulation studie
 
 * [DatGenFunBiv.R](https://github.com/ChiaraDG/MultivariateODS_LMM/blob/main/Simulation%20Studies/DatGenFunBiv.R). Contains the code to generate bivariate LMM data, and identify informative subjects for a two-phase design under the ODS and/or BDS design
 
-* [FitImputeFunsIIA.R](https://github.com/ChiaraDG/MultivariateODS_LMM/blob/main/Simulation%20Studies/FitImputeFunsIIA.R). Contains the code necessary to run the multiple imputation approach
+* [FitImputeMI.R](https://github.com/ChiaraDG/MultivariateODS_LMM/blob/main/Simulation%20Studies/FitImputeMI.R). Contains the code necessary to run the multiple imputation approach
 
 * [Table 2](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/Simulation%20Studies/Table%202). Contains the simulation setup used for Table 2 in the main paper (`setup.R`) as well as the R file (`run.R`) needed to run all the code under different designs and inference procedures (ACML and MI)
 
