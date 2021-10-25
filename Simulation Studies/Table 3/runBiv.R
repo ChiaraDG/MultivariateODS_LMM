@@ -14,7 +14,7 @@ library(numDeriv)
 # load R files with function
 source("ACML.R")
 source("DatGenFunBiv.R")
-source("FitImputeFunsIIA.R")
+source("FitImputeMI.R")
 source("setupBiv.R")
 
 fisherZ <- function(x) log((1+x)/(1-x))
@@ -196,7 +196,7 @@ simulation <- function(run, count)
   dat.ods$gt1     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$gt1, NA)
   dat.ods$gt2     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$gt2, NA)
 
-  model.ods   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+  model.ods   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
                      formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
                      formula.imp = grp ~ conf, data = dat.ods, 
                      n.imp = nrep.imp, n.burn = burn, id = "id", grp = c("g1", "g2"), 
