@@ -4,6 +4,6 @@ The files `ACML.R` and `FitImputeMILHS.R` contain the code to perform ACML and M
 
 To be able to reproduce the results one would need the original data from the Lung Health Study, load the files `ACML.R` and `FitImputeFunsMILHS.R`, and run the code in `runBivLHS.R`.
 
-The resulting table will contain:
+After running `runBivLHS.R`, the resulting table will contain:
 
 1. Estimated coefficients and standard errors for all the covariates includes in the model.
