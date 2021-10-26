@@ -108,7 +108,8 @@ acml.bds    <- acml.lmem2(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 
 ```{r, eval = FALSE}
 # prepare the data for MI
 dat.long       <- fulldat %>% gather(., key = "y_name", value = "Y", Y1, Y2) %>%
-                  mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>% arrange(id)
+                  mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>% 
+                  arrange(id)
 dat.long$t1    <- dat.long$D1*dat.long$time
 dat.long$g1    <- dat.long$D1*dat.long$grp
 dat.long$c1    <- dat.long$D1*dat.long$conf
@@ -141,7 +142,8 @@ model.rs.mi   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 +
 ```{r, eval = FALSE}
 # prepare the data for MI
 dat.long       <- fulldat %>% gather(., key = "y_name", value = "Y", Y1, Y2) %>%
-                  mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>% arrange(id)
+                  mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>% 
+                  arrange(id)
 dat.long$t1    <- dat.long$D1*dat.long$time
 dat.long$g1    <- dat.long$D1*dat.long$grp
 dat.long$c1    <- dat.long$D1*dat.long$conf
@@ -174,7 +176,8 @@ model.ods.mi   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 
 ```{r, eval = FALSE}
 # prepare the data for MI
 dat.long       <- fulldat %>% gather(., key = "y_name", value = "Y", Y1, Y2) %>%
-                  mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>% arrange(id)
+                  mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>% 
+                  arrange(id)
 dat.long$t1    <- dat.long$D1*dat.long$time
 dat.long$g1    <- dat.long$D1*dat.long$grp
 dat.long$c1    <- dat.long$D1*dat.long$conf
