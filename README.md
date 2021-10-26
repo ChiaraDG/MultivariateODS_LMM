@@ -7,3 +7,5 @@ The R scripts in this repository contain the code necessary to reproduce simulat
 * [LHS](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/LHS): contains the code necessary to replicate the analysis of the Lung Health Study
 
 More detailed instruction on how to reproduce the results are provided in each folder
+
+## Example
