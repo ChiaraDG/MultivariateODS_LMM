@@ -29,7 +29,7 @@ sigma.e1.sim <- 9/4; sigma.e2.sim <- 4/4
 Nsample.sim <- 400
 
 # number of iteration for MI
-m <- 10
+m <- 20
 
 # for ACCRE
 n                   <- 1
