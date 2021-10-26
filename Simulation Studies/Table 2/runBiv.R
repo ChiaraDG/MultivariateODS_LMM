@@ -12,12 +12,10 @@ library(Matrix)
 library(numDeriv)
 
 # load R files with function
-source("./OffsetImputation/BivariateLMM/Functions6.R")
-source("./OffsetImputation/BivariateLMM/DatGenFunBiv.R")
-#source("./OffsetImputation/BivariateLMM/FitImputeFunsOffsetBivNew.R")
-source("./OffsetImputation/BivariateLMM/setupBiv.R")
-
-source("./OffsetImputation/BivariateLMM/FitImputeMI.R")
+source("ACML.R")
+source("DatGenFunBiv.R")
+source("setupBiv.R")
+source("FitImputeMI.R")
 
 fisherZ <- function(x) log((1+x)/(1-x))
 n       <- 1
@@ -124,31 +122,11 @@ simulation <- function(run, count)
   # generate sampling indicators, and sampling probabilities
   cat("Generating sampling indicator")
   
-  #### For re-using data collected in previous phase 1 sample ####
-  #dat.samp <- SampledFunY1(d = dat, NsPerStratumUniv = NsPerStratumUniv.sim, 
-  #                         Y1.cutoffsODS =  cutoffs.Y1.ODS,
-  #                         Y1.cutoffsBDS =  cutoffs.Y1.BDS)
-  #fulldat <- dat.samp$dat
-  
   #### For Independent Sampling ####
   dat.samp <- SampledFun(d = dat, Nsample = Nsample.sim, NsPerStratumUniv = NsPerStratumUniv.sim,
                            Y1.cutoffsODS =  cutoffs.Y1.ODS, Y2.cutoffsODS = cutoffs.Y2.ODS,
                           Y1.cutoffsBDS =  cutoffs.Y1.BDS, Y2.cutoffsBDS = cutoffs.Y2.BDS)
   fulldat <- dat.samp$dat
-  
-  ##########################################################
-  #### Re-using Data: fit MLE with Y2 only to show bias ####
-  # lme.Y2 <- lme(Y2 ~ grp + conf + time + timegrp + timeconf, 
-  #               data = subset(fulldat, SampledSlpODS == 1), 
-  #               random = ~ 1 + time | id,  
-  #               control = lmeControl(maxIter = 1e9, opt = c("optim")))
-  # Y2only.MLE  <- list(coefficients = c(rep(NA, 6), fixef(lme.Y2)), 
-  #                     covariance = c(rep(NA, 6), diag(vcov(lme.Y2))))
-  ##########################################################
-  
-  ##########################################################
-  #### Independent sampling ################################
-  ##########################################################
   
   # fit ML and ACML with nlme and Functions6.R
   cat("Fit Complete Data Only: ML and ACML")
@@ -307,134 +285,76 @@ simulation <- function(run, count)
                     covariance = diag(acml.bds$covariance)[1:12])
 
   
-  ###################################################################################################
-  #### Re-use Data collected in a previous two-phase design #########################################
-  ###################################################################################################
-  
-  # dat.long <- fulldat %>%
-  #         gather(., key = "y_name", value = "Y", Y1, Y2) %>%
-  #         mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>%
-  #         arrange(id)
-  #  
-  # # prepare the data for acml fitting
-  # dat.long$NoWeighting <- 1
-  # dat.long             <- dat.long %>% filter(SampledSlpODS == 1)
-  # dat.long$Slp.w       <- "slope1"
-  # w.functionSlp        <- dat.long$Slp.w
-  #  
-  # # get the data in the right format
-  # dat.long$t1  <- dat.long$D1*dat.long$time
-  # dat.long$g1  <- dat.long$D1*dat.long$grp
-  # dat.long$c1  <- dat.long$D1*dat.long$conf
-  # dat.long$gt1 <- dat.long$D1*dat.long$timegrp
-  # dat.long$ct1 <- dat.long$D1*dat.long$timeconf
-  # 
-  # dat.long$t2  <- dat.long$D2*dat.long$time
-  # dat.long$g2  <- dat.long$D2*dat.long$grp
-  # dat.long$c2  <- dat.long$D2*dat.long$conf
-  # dat.long$gt2 <- dat.long$D2*dat.long$timegrp
-  # dat.long$ct2 <- dat.long$D2*dat.long$timeconf
-  # 
-  # dat.long$SlpProbLow <- dat.samp$SampProbsODS[[1]][1]
-  # dat.long$SlpProbMed <- dat.samp$SampProbsODS[[1]][2]
-  # dat.long$SlpProbHig <- dat.samp$SampProbsODS[[1]][3]
-  # SampProbSlp <- cbind(dat.long$SlpProbLow, dat.long$SlpProbMed, dat.long$SlpProbHig)
-  #  
-  # dat.long$SlpCutoff1 <- cutoffs.Y1.ODS$SlpCutUniv[1]
-  # dat.long$SlpCutoff2 <- cutoffs.Y1.ODS$SlpCutUniv[2]
-  # cutpointsSlp <- cbind(dat.long$SlpCutoff1, dat.long$SlpCutoff2)
-  # # fit model
-  # acml.ods <- acml.lmem2(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2,
-  #                            formula.random = ~ 0 + D1 + t1 + D2 + t2,
-  #                            data = dat.long, id = id, InitVals = truevals.biv.ods,
-  #                            SampProb = SampProbSlp, cutpoints = cutpointsSlp, 
-  #                        Weights = NoWeighting, w.function = w.functionSlp)
-  #  
-  # acml.ods  <- list(coefficients = acml.ods$coefficients[1:12], 
-  #                   covariance = diag(acml.ods$covariance)[1:12])
-  # 
-  ##########################################################
-  
   #### Fit imputation iteratively for each study design ####
-  # cat("Fit Multiple Imputation Iteratively")
-  # 
-  # dat.long <- fulldat %>%
-  #   gather(., key = "y_name", value = "Y", Y1, Y2) %>%
-  #   mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>%
-  #   arrange(id)
-  # 
-  # dat.long$t1  <- dat.long$D1*dat.long$time
-  # dat.long$g1  <- dat.long$D1*dat.long$grp
-  # dat.long$c1  <- dat.long$D1*dat.long$conf
-  # dat.long$gt1 <- dat.long$D1*dat.long$timegrp
-  # dat.long$ct1 <- dat.long$D1*dat.long$timeconf
-  # 
-  # dat.long$t2  <- dat.long$D2*dat.long$time
-  # dat.long$g2  <- dat.long$D2*dat.long$grp
-  # dat.long$c2  <- dat.long$D2*dat.long$conf
-  # dat.long$gt2 <- dat.long$D2*dat.long$timegrp
-  # dat.long$ct2 <- dat.long$D2*dat.long$timeconf
-
-  # 
-  #dat.rs         <- dat.long
-  #dat.rs$grp     <- ifelse(dat.rs$SampledRan == 1, dat.rs$grp, NA)
-  #dat.rs$timegrp <- ifelse(dat.rs$SampledRan == 1, dat.rs$timegrp, NA)
-  #dat.rs$g1      <- ifelse(dat.rs$SampledRan == 1, dat.rs$g1, NA)
-  #dat.rs$g2      <- ifelse(dat.rs$SampledRan == 1, dat.rs$g2, NA)
-  #dat.rs$gt1     <- ifelse(dat.rs$SampledRan == 1, dat.rs$gt1, NA)
-  #dat.rs$gt2     <- ifelse(dat.rs$SampledRan == 1, dat.rs$gt2, NA)
-
-  # dat.ods         <- dat.long
-  # dat.ods$grp     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$grp, NA)
-  # dat.ods$timegrp <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$timegrp, NA)
-  # dat.ods$g1      <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$g1, NA)
-  # dat.ods$g2      <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$g2, NA)
-  # dat.ods$gt1     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$gt1, NA)
-  # dat.ods$gt2     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$gt2, NA)
-
-  # dat.bds         <- dat.long
-  # dat.bds$grp     <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$grp, NA)
-  # dat.bds$timegrp <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$timegrp, NA)
-  # dat.bds$g1      <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$g1, NA)
-  # dat.bds$g2      <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$g2, NA)
-  # dat.bds$gt1     <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$gt1, NA)
-  # dat.bds$gt2     <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$gt2, NA)
-  
-  #model.rs.mi   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
-  #                   formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
-  #                   formula.imp = grp ~ conf, data = dat.rs, 
-  #                   n.imp = 5,
-  #                   iter = 5, id = "id", grp = c("g1", "g2"), 
-  #                   timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
-
-  
-  # model.ods.mi   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
-  #                       formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
-  #                       formula.imp = grp ~ conf, data = dat.ods, n.imp = 5,
-  #                       iter = 5, id = "id", grp = c("g1", "g2"), 
-  #                       timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
+  cat("Fit Multiple Imputation Iteratively")
    
-  # model.bds.mi   <- IIM(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
-  #                       formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
-  #                       formula.imp = grp ~ conf, data = dat.bds, n.imp = 5,
-  #                       iter = 20, id = "id", grp = c("g1", "g2"), 
-  #                       timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
+  dat.long <- fulldat %>%
+     gather(., key = "y_name", value = "Y", Y1, Y2) %>%
+     mutate(D1 = as.integer(y_name == "Y1"), D2 = as.integer(y_name == "Y2")) %>%
+     arrange(id)
+   
+  dat.long$t1  <- dat.long$D1*dat.long$time
+  dat.long$g1  <- dat.long$D1*dat.long$grp
+  dat.long$c1  <- dat.long$D1*dat.long$conf
+  dat.long$gt1 <- dat.long$D1*dat.long$timegrp
+  dat.long$ct1 <- dat.long$D1*dat.long$timeconf
+   
+  dat.long$t2  <- dat.long$D2*dat.long$time
+  dat.long$g2  <- dat.long$D2*dat.long$grp
+  dat.long$c2  <- dat.long$D2*dat.long$conf
+  dat.long$gt2 <- dat.long$D2*dat.long$timegrp
+  dat.long$ct2 <- dat.long$D2*dat.long$timeconf
+
+   
+  dat.rs         <- dat.long
+  dat.rs$grp     <- ifelse(dat.rs$SampledRan == 1, dat.rs$grp, NA)
+  dat.rs$timegrp <- ifelse(dat.rs$SampledRan == 1, dat.rs$timegrp, NA)
+  dat.rs$g1      <- ifelse(dat.rs$SampledRan == 1, dat.rs$g1, NA)
+  dat.rs$g2      <- ifelse(dat.rs$SampledRan == 1, dat.rs$g2, NA)
+  dat.rs$gt1     <- ifelse(dat.rs$SampledRan == 1, dat.rs$gt1, NA)
+  dat.rs$gt2     <- ifelse(dat.rs$SampledRan == 1, dat.rs$gt2, NA)
+
+  dat.ods         <- dat.long
+  dat.ods$grp     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$grp, NA)
+  dat.ods$timegrp <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$timegrp, NA)
+  dat.ods$g1      <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$g1, NA)
+  dat.ods$g2      <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$g2, NA)
+  dat.ods$gt1     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$gt1, NA)
+  dat.ods$gt2     <- ifelse(dat.ods$SampledSlpODS == 1, dat.ods$gt2, NA)
+
+  dat.bds         <- dat.long
+  dat.bds$grp     <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$grp, NA)
+  dat.bds$timegrp <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$timegrp, NA)
+  dat.bds$g1      <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$g1, NA)
+  dat.bds$g2      <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$g2, NA)
+  dat.bds$gt1     <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$gt1, NA)
+  dat.bds$gt2     <- ifelse(dat.bds$SampledSlpBDS == 1, dat.bds$gt2, NA)
+  
+  model.rs.mi   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+                     formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
+                     formula.imp = grp ~ conf, data = dat.rs, n.imp = 70,
+                     iter = 10, id = "id", grp = c("g1", "g2"), 
+                     timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
+
+  
+  model.ods.mi   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+                         formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
+                         formula.imp = grp ~ conf, data = dat.ods, n.imp = 70,
+                         iter = 10, id = "id", grp = c("g1", "g2"), 
+                         timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
+   
+  model.bds.mi   <- MI(formula.fixed = Y ~ 0 + D1 + g1 + c1 + t1 + gt1 + ct1 + D2 + g2 + c2 + t2 + gt2 + ct2, 
+                         formula.random = ~0 + D1 + t1 + D2 + t2 | id, 
+                         formula.imp = grp ~ conf, data = dat.bds, n.imp = 70,
+                         iter = 10, id = "id", grp = c("g1", "g2"), 
+                         timegrp = c("gt1", "gt2"), time = c("t1", "t2"), yname = "y_name")
    
   # get the results
   cat("Saving Results")
   # save the results for the primary analysis
-  fits    <- list(CompleteCase.MLE, acml.ods, acml.bds)
-  results <- cbind(Sampling = c("CompleteCaseMLE", "ACML ODS", "ACML BDS"), 
+  fits    <- list(CompleteCase.MLE, acml.ods, acml.bds, model.rs.mi, model.ods.mi, model.bds.mi)
+  results <- cbind(Sampling = c("CompleteCaseMLE", "ACML ODS", "ACML BDS", "MI RS", "MI ODS", "MI BDS"), 
                    coverage(fits, params), ests(fits), vars(fits))
-  
-  #fits    <- list(model.ods.mi)
-  #results <- cbind(Sampling = c("IIM ODS"), 
-  #                 coverage(fits, params), ests(fits), Ds(fits), Ss(fits), vars(fits))
-  
-  ##### save the results for re-use of previusly collected data #####
-  #fits <- list(Y2only.MLE, acml.ods, model.ods)
-  #results <- cbind(Sampling = c("Y2 Only", "ACML ODS", "IIM ODS"), 
-  #                 coverage(fits, params), ests(fits), vars(fits))
   
   # save the results
   save(results, file=paste0("outputIIM/run-", run, "-", count, ".RData"))
