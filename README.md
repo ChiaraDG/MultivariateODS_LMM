@@ -36,7 +36,7 @@ rho.e.sim <- 0
 sigma.e1.sim <- 9/4; sigma.e2.sim <- 4/4
 ```
 
-The data, the cut-offs to be used under ODS and/or BDS scenario and the selection of informative individuals can be done using the following code:
+The data, cut-offs for ODS and/or BDS sampling, and selection of informative individuals can be done using the following code:
 
 ```{r, eval = FALSE}
 cat("Generating random data from known parameters")
