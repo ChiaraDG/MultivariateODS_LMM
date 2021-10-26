@@ -8,7 +8,7 @@ The folder contains .R files to replicate the results from the simulation studie
 
 * [FitImputeMI.R](https://github.com/ChiaraDG/MultivariateODS_LMM/blob/main/Simulation%20Studies/FitImputeMI.R). Contains the code necessary to run the multiple imputation approach
 
-* [plotRE.R]. Contains the code necessary to generate Figure 1 in the paper
+* [plotRE.R](https://github.com/ChiaraDG/MultivariateODS_LMM/blob/main/Simulation%20Studies/plotRE.R). Contains the code necessary to generate Figure 1 in the paper
 
 * [Table 2](https://github.com/ChiaraDG/MultivariateODS_LMM/tree/main/Simulation%20Studies/Table%202). Contains the simulation setup used for Table 2 in the main paper (`setup.R`) as well as the R file (`runBiv.R`) needed to run all the code for different designs and inference procedures (ACML and MI)
 
